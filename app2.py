@@ -1,13 +1,39 @@
 from lywsd03mmc import Lywsd03mmcClient
 import time
 import devices
+# email
+import smtplib
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+import accounts
 
+
+def low_battery_email(battery, name): # will connect with the database so can inform user every -1%.
+    msg = MIMEMultipart()
+    msg['From'] = accounts.email_username
+    msg['To'] = 'telis.koutsogiannakis@gmail.com'
+    msg['Subject'] = 'Xiaomi Low Battery Warning'
+    message = f'Your device with name "{name}", is low on battery {battery} %\nReplace the battery soon!'
+    msg.attach(MIMEText(message))
+
+    mailserver = smtplib.SMTP('smtp.gmail.com', 587)
+    mailserver.ehlo()
+    mailserver.starttils()
+    mailserver.ehlo()
+    mailserver.login(accounts.email_username, accounts.email_password) 
+    mailserver.sendmail(accounts.email_username,accounts.email_receiver,msg.as_string())
+    mailserver.quit()
+    
 
 def read_data(name:str, device_mac_address):
     try:
         room = Lywsd03mmcClient(device_mac_address)
         room_data = room.data
         print(f'Rooms Name: {name},\nTemperature: {str(room_data.temperature)},\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
+        
+        if int(room_data.battery) <= 50:
+            low_battery_email(room_data.battery, name)
+
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
     except:
         print(f'Connection Error at room {name}')
@@ -23,54 +49,7 @@ while True:
     airbnb = read_data('Airbnb',devices.airbnb)
 
 
+
     time.sleep(60)
 
         
-
-
-
-'''while True:
-
-    kids_bedroom = Lywsd03mmcClient(devices.kids_bedroom)
-    parents_bedroom = Lywsd03mmcClient(devices.parents_bedroom)
-    living_room = Lywsd03mmcClient(devices.living_room)
-    airbnb = Lywsd03mmcClient(devices.airbnb)
-
-    kids_data = kids_bedroom.data
-    parents_data = parents_bedroom.data
-    living_r_data = living_room.data
-    airbnb_data = airbnb.data
-
-    print('Kids Room: ')
-    print('Temperature: ' + str(kids_data.temperature))
-    print('Humidity: ' + str(kids_data.humidity))
-    print('Battery: ' + str(kids_data.battery))
-    #print('Display units: ' + kids_data.units)
-
-    print('Parents Room: ')
-    print('Temperature: ' + str(parents_data.temperature))
-    print('Humidity: ' + str(parents_data.humidity))
-    print('Battery: ' + str(parents_data.battery))
-    # print('Display units: ' + parents_data.units)
-
-    print('Living Room: ')
-    print('Temperature: ' + str(living_r_data.temperature))
-    print('Humidity: ' + str(living_r_data.humidity))
-    print('Battery: ' + str(living_r_data.battery))
-    # print('Display units: ' + living_r_data.units)
-
-    print('Airbnb House: ')
-    print('Temperature: ' + str(airbnb_data.temperature))
-    print('Humidity: ' + str(airbnb_data.humidity))
-    print('Battery: ' + str(airbnb_data.battery))
-    # print('Display units: ' + airbnb_data.units)
-
-    time.sleep(300)
-
-# # Enable history output
-# client.enable_history_progress = True
-
-# # Retrieve the history data
-# history = client.history_data
-
-# print(history)'''
