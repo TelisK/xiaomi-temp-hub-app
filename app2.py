@@ -3,26 +3,27 @@ import time
 import devices
 # email
 import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import accounts
 
 
 def low_battery_email(battery, name): # will connect with the database so can inform user every -1%.
     msg = MIMEMultipart()
     msg['From'] = accounts.email_username
-    msg['To'] = 'telis.koutsogiannakis@gmail.com'
+    msg['To'] = accounts.email_receiver
     msg['Subject'] = 'Xiaomi Low Battery Warning'
     message = f'Your device with name "{name}", is low on battery {battery} %\nReplace the battery soon!'
-    msg.attach(MIMEText(message))
+    msg.attach(MIMEText(message), 'plain', 'utf-8')
 
-    mailserver = smtplib.SMTP('smtp.gmail.com', 587)
+    mailserver = smtplib.SMTP_SSL('smtp.gmail.com', 465)
     mailserver.ehlo()
-    mailserver.starttils()
+    mailserver.starttls()
     mailserver.ehlo()
     mailserver.login(accounts.email_username, accounts.email_password) 
     mailserver.sendmail(accounts.email_username,accounts.email_receiver,msg.as_string())
     mailserver.quit()
+    return True
     
 
 def read_data(name:str, device_mac_address):
@@ -31,8 +32,12 @@ def read_data(name:str, device_mac_address):
         room_data = room.data
         print(f'Rooms Name: {name},\nTemperature: {str(room_data.temperature)},\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
-        if int(room_data.battery) <= 50:
+        if room_data.battery <= 60:
             low_battery_email(room_data.battery, name)
+            print('Low Battery Email Sent')
+        else:
+            print('Battery is charged')
+
 
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
     except:
