@@ -1,5 +1,5 @@
 from lywsd03mmc import Lywsd03mmcClient
-import time
+from datetime import date, time
 import devices
 # email
 import smtplib
@@ -38,18 +38,20 @@ def read_data(name:str, device_mac_address):
         room_data = room.data
         print(f'Rooms Name: {name},\nTemperature: {str(room_data.temperature)},\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
-        # if room_data.battery <= 60:
-        #     low_battery_email(room_data.battery, name)
-        #     print('Low Battery Email Sent')
-        # else:
-        #     print('Battery is charged')
+        if room_data.battery <= 60:
+            low_battery_email(room_data.battery, name)
+            print('Low Battery Email Sent')
+        else:
+            print('Battery is charged')
 
-# -------φτιαχνω τη βαση-----------
+# ------------------------------------------------------ βαση σε εξελιξη -----------------
+        error_reading = 1
+        mydb.add_to_db(name,date,time,room_data.temperature,room_data.humidity,room_data.battery)
 
-        # mydb.db_creation().cur.execute('INSERT INTO rooms (room_name) VALUES (?)', str(name))
-        # mydb.db_creation().cur.execute('INSERT INTO measurements ()')
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
     except:
+        error_reading = 0
+        mydb.add_to_db(name,date,time,error_reading)
         print(f'Connection Error at room {name}')
         return 'Error', {name}
 
