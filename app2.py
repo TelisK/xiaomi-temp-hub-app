@@ -5,24 +5,30 @@ import devices
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import accounts
+import my_accounts
+#db
+import mydb
+import sqlite3
 
+
+mydb.db_creation()
 
 def low_battery_email(battery, name): # will connect with the database so can inform user every -1%.
-    msg = MIMEMultipart()
-    msg['From'] = accounts.email_username
-    msg['To'] = accounts.email_receiver
-    msg['Subject'] = 'Xiaomi Low Battery Warning'
-    message = f'Your device with name "{name}", is low on battery {battery} %\nReplace the battery soon!'
-    msg.attach(MIMEText(message), 'plain', 'utf-8')
 
-    mailserver = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    mailserver.ehlo()
-    mailserver.starttls()
-    mailserver.ehlo()
-    mailserver.login(accounts.email_username, accounts.email_password) 
-    mailserver.sendmail(accounts.email_username,accounts.email_receiver,msg.as_string())
-    mailserver.quit()
+    subject = 'Xiaomi Low Battery Warning'
+    body = f'Your device with name "{name}", is low on battery {battery} %\nReplace the battery soon!'
+    sender = my_accounts.email_sender
+    recipient = my_accounts.email_recipient
+    password = my_accounts.email_password
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = recipient
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+       smtp_server.login(sender, password)
+       smtp_server.sendmail(sender, recipient, msg.as_string())
+    print("Message sent!")
     return True
     
 
@@ -32,13 +38,16 @@ def read_data(name:str, device_mac_address):
         room_data = room.data
         print(f'Rooms Name: {name},\nTemperature: {str(room_data.temperature)},\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
-        if room_data.battery <= 60:
-            low_battery_email(room_data.battery, name)
-            print('Low Battery Email Sent')
-        else:
-            print('Battery is charged')
+        # if room_data.battery <= 60:
+        #     low_battery_email(room_data.battery, name)
+        #     print('Low Battery Email Sent')
+        # else:
+        #     print('Battery is charged')
 
+# -------φτιαχνω τη βαση-----------
 
+        # mydb.db_creation().cur.execute('INSERT INTO rooms (room_name) VALUES (?)', str(name))
+        # mydb.db_creation().cur.execute('INSERT INTO measurements ()')
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
     except:
         print(f'Connection Error at room {name}')
