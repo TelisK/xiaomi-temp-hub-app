@@ -1,5 +1,6 @@
 from lywsd03mmc import Lywsd03mmcClient
-from datetime import date, time
+from datetime import datetime
+import time
 import devices
 # email
 import smtplib
@@ -12,6 +13,7 @@ import sqlite3
 
 
 mydb.db_creation()
+mydb.rooms_to_database()
 
 def low_battery_email(battery, name): # will connect with the database so can inform user every -1%.
 
@@ -33,6 +35,7 @@ def low_battery_email(battery, name): # will connect with the database so can in
     
 
 def read_data(name:str, device_mac_address):
+    now_date_time = datetime.now()
     try:
         room = Lywsd03mmcClient(device_mac_address)
         room_data = room.data
@@ -46,12 +49,12 @@ def read_data(name:str, device_mac_address):
 
 # ------------------------------------------------------ βαση σε εξελιξη -----------------
         error_reading = 1 # 1 = True
-        mydb.add_to_db(name,date,time,room_data.temperature,room_data.humidity,room_data.battery, error_reading)
+        mydb.add_to_db(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),room_data.temperature,room_data.humidity,room_data.battery, error_reading)
 
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
     except:
         error_reading = 0 # 0 = False
-        mydb.add_to_db(name,date,time,error_reading)
+        mydb.add_to_db_error(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),error_reading)
         print(f'Connection Error at room {name}')
         return 'Error', {name}
 
@@ -68,4 +71,4 @@ while True:
 
     time.sleep(60)
 
-        
+    
