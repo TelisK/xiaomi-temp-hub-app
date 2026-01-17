@@ -42,7 +42,7 @@ def read_data(name:str, device_mac_address):
         print('--------------------')
         print(f'Rooms Name: {name},\nTemperature: {str(room_data.temperature)},\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
-        if room_data.battery <= 60:
+        if room_data.battery <= 25:
             previous_batt = mydb.battery_fall_check(name)
             if previous_batt is not None and previous_batt - room_data.battery > 1:
                 low_battery_email(room_data.battery, name)
