@@ -45,12 +45,12 @@ def read_data(name:str, device_mac_address):
             print('Battery is charged')
 
 # ------------------------------------------------------ βαση σε εξελιξη -----------------
-        error_reading = 1
-        mydb.add_to_db(name,date,time,room_data.temperature,room_data.humidity,room_data.battery)
+        error_reading = 1 # 1 = True
+        mydb.add_to_db(name,date,time,room_data.temperature,room_data.humidity,room_data.battery, error_reading)
 
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
     except:
-        error_reading = 0
+        error_reading = 0 # 0 = False
         mydb.add_to_db(name,date,time,error_reading)
         print(f'Connection Error at room {name}')
         return 'Error', {name}
