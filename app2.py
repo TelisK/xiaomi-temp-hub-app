@@ -9,7 +9,7 @@ from email.mime.text import MIMEText
 import my_accounts
 #db
 import mydb
-import sqlite3
+
 
 
 mydb.db_creation()
@@ -39,15 +39,24 @@ def read_data(name:str, device_mac_address):
     try:
         room = Lywsd03mmcClient(device_mac_address)
         room_data = room.data
+        print('--------------------')
         print(f'Rooms Name: {name},\nTemperature: {str(room_data.temperature)},\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
         if room_data.battery <= 60:
-            low_battery_email(room_data.battery, name)
-            print('Low Battery Email Sent')
+            previous_batt = mydb.battery_fall_check(name)
+            if previous_batt is not None and previous_batt - room_data.battery > 1:
+                low_battery_email(room_data.battery, name)
+                print('Low Battery Email Sent')
+            elif previous_batt - room_data.battery == 0:
+                print('Low Battery Email Not Sent - Will sent after 1%% difference')
+            elif previous_batt is None:
+                print('Battery check skipped (No previous data)')
+            else:
+                print('Battery check skipped (Something is wrong)')
         else:
             print('Battery is charged')
 
-# ------------------------------------------------------ βαση σε εξελιξη -----------------
+# Database
         error_reading = 1 # 1 = True
         mydb.add_to_db(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),room_data.temperature,room_data.humidity,room_data.battery, error_reading)
 
@@ -55,6 +64,7 @@ def read_data(name:str, device_mac_address):
     except:
         error_reading = 0 # 0 = False
         mydb.add_to_db_error(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),error_reading)
+        print('--------------------')
         print(f'Connection Error at room {name}')
         return 'Error', {name}
 

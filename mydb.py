@@ -20,7 +20,7 @@ def db_creation():
     conn.commit()
     conn.close()
 
-def rooms_to_database():#write the rooms to database
+def rooms_to_database(): # Write the rooms to database
     rooms_to_db = {1:'Living Room',2:'Parents',3:'Kids',4:'Airbnb'}
     conn = sqlite3.connect('xiaomi-temp.db')
     cur = conn.cursor()
@@ -67,4 +67,15 @@ def add_to_db_error(name,measurement_date,time,error):
     ))
     conn.commit()
     conn.close()
+
+def battery_fall_check(name): # Checking the last value of the battery on the database
+    conn = sqlite3.connect('xiaomi-temp.db')
+    cur = conn.cursor()
+
+    cur.execute('SELECT id FROM rooms WHERE room_name = ?', (name,))
+    room_id_to_check = cur.fetchone()[0]
+
+    cur.execute('SELECT battery FROM measurements WHERE room_id = ? AND battery IS NOT NULL ORDER BY measurements_id DESC LIMIT 1', (room_id_to_check,))
+    previous_batt_measurement = cur.fetchone()[0]
+    return previous_batt_measurement
     
