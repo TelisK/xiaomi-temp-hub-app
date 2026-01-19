@@ -1,4 +1,3 @@
-````markdown
 # Xiaomi Temperature Hub
 
 A Python application to read data from multiple Xiaomi LYWSD03MMC temperature & humidity sensors and store the measurements in a local SQLite database. The app also monitors battery levels and sends email notifications when batteries are low.
@@ -130,6 +129,4 @@ Battery is charged
 ## License
 
 This project is open-source and free to use for personal or educational purposes.
-
-```
 
