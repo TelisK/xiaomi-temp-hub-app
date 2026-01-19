@@ -15,7 +15,7 @@ import mydb
 mydb.db_creation()
 mydb.rooms_to_database()
 
-def low_battery_email(battery, name): # will connect with the database so can inform user every -1%.
+def low_battery_email(battery, name):
 
     subject = 'Xiaomi Low Battery Warning'
     body = f'Your device with name "{name}", is low on battery {battery} %\nReplace the battery soon!'
@@ -40,17 +40,19 @@ def read_data(name:str, device_mac_address):
         room = Lywsd03mmcClient(device_mac_address)
         room_data = room.data
         print('--------------------')
-        print(f'Rooms Name: {name},\nTemperature: {str(room_data.temperature)},\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
+        print(f'Rooms Name: {name}\nTemperature: {str(room_data.temperature)}\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
-        if room_data.battery <= 25:
+        if room_data.battery <= 25: # Connect with the database so can inform user every -1%.
             previous_batt = mydb.battery_fall_check(name)
-            if previous_batt is not None and previous_batt - room_data.battery > 1:
+            if previous_batt is not None and previous_batt > room_data.battery:  # compare float with int
                 low_battery_email(room_data.battery, name)
                 print('Low Battery Email Sent')
-            elif previous_batt - room_data.battery == 0:
-                print('Low Battery Email Not Sent - Will sent after 1%% difference')
+                mydb.update_battery_lowest_update(name, room_data.battery)
             elif previous_batt is None:
+                mydb.update_battery_lowest_update(name, room_data.battery)
                 print('Battery check skipped (No previous data)')
+            elif previous_batt - room_data.battery == 0 or previous_batt < room_data.battery:
+                print('Low Battery Email Not Sent - Will sent after 1%% difference')
             else:
                 print('Battery check skipped (Something is wrong)')
         else:

@@ -1,7 +1,7 @@
 import sqlite3
 
 def db_creation():
-    conn = sqlite3.connect('xiaomi-temp.db')
+    conn = sqlite3.connect('xiaomi-temp-db.db')
     cur = conn.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS rooms (
                 id INTEGER PRIMARY KEY,
@@ -14,6 +14,7 @@ def db_creation():
                 temperature FLOAT,
                 humidity FLOAT,
                 battery FLOAT,
+                battery_lowest FLOAT,
                 error_reading INTEGER NOT NULL,
                 FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE)''')
     
@@ -22,7 +23,7 @@ def db_creation():
 
 def rooms_to_database(): # Write the rooms to database
     rooms_to_db = {1:'Living Room',2:'Parents',3:'Kids',4:'Airbnb'}
-    conn = sqlite3.connect('xiaomi-temp.db')
+    conn = sqlite3.connect('xiaomi-temp-db.db')
     cur = conn.cursor()
     cur.execute('SELECT * FROM rooms')
     exists = cur.fetchall()
@@ -33,7 +34,7 @@ def rooms_to_database(): # Write the rooms to database
         conn.close()
 
 def add_to_db(name,measurement_date,time,temp,humid,batt,error):
-    conn = sqlite3.connect('xiaomi-temp.db')
+    conn = sqlite3.connect('xiaomi-temp-db.db')
     cur = conn.cursor()
     
     cur.execute('SELECT id FROM rooms WHERE room_name = ?', (name,))
@@ -53,7 +54,7 @@ def add_to_db(name,measurement_date,time,temp,humid,batt,error):
     
 
 def add_to_db_error(name,measurement_date,time,error):
-    conn = sqlite3.connect('xiaomi-temp.db')
+    conn = sqlite3.connect('xiaomi-temp-db.db')
     cur = conn.cursor()
     
     cur.execute('SELECT id FROM rooms WHERE room_name = ?', (name,))
@@ -69,13 +70,22 @@ def add_to_db_error(name,measurement_date,time,error):
     conn.close()
 
 def battery_fall_check(name): # Checking the last value of the battery on the database
-    conn = sqlite3.connect('xiaomi-temp.db')
-    cur = conn.cursor()
+    with sqlite3.connect('xiaomi-temp-db.db') as conn:  # database must close after return
+        cur = conn.cursor()
 
-    cur.execute('SELECT id FROM rooms WHERE room_name = ?', (name,))
-    room_id_to_check = cur.fetchone()[0]
+        cur.execute('SELECT id FROM rooms WHERE room_name = ?', (name,))
+        room_id_to_check = cur.fetchone()[0]
 
-    cur.execute('SELECT battery FROM measurements WHERE room_id = ? AND battery IS NOT NULL ORDER BY measurements_id DESC LIMIT 1', (room_id_to_check,))
-    previous_batt_measurement = cur.fetchone()[0]
-    return previous_batt_measurement
-    
+        cur.execute('SELECT battery_lowest FROM measurements WHERE room_id = ? AND battery_lowest IS NOT NULL ORDER BY measurements_id DESC LIMIT 1', (room_id_to_check,))
+        previous_batt_measurement = cur.fetchone()
+        return previous_batt_measurement[0] if previous_batt_measurement is not None else None # At the first run, the program doesnt take a value. So we return None
+        
+def update_battery_lowest_update(name, battery):
+    with sqlite3.connect('xiaomi-temp-db.db') as conn:  # database must close after return
+        cur = conn.cursor()
+
+        cur.execute('SELECT id FROM rooms WHERE room_name = ?', (name,))
+        room_id_to_check = cur.fetchone()[0]
+
+        cur.execute('UPDATE measurements SET battery_lowest = ? WHERE room_id = ?', (battery, room_id_to_check))
+        print('Lowest battery cell updated')
