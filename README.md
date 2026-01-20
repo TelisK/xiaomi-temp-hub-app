@@ -1,7 +1,8 @@
+
 # Xiaomi Temperature Hub
 
 A Python application to read data from multiple Xiaomi LYWSD03MMC temperature & humidity sensors and store the measurements in a local SQLite database. The app also monitors battery levels and sends email notifications when batteries are low.
-### This application runs only in Linux.
+
 ---
 
 ## Features
@@ -22,13 +23,10 @@ A Python application to read data from multiple Xiaomi LYWSD03MMC temperature & 
 
 ## Requirements
 
-- **Linux only** – this application has been tested on Linux-based systems (Raspberry Pi, Ubuntu, etc.)
 - Python 3.7+
 - Libraries:
   ```bash
   pip install python-lywsd03mmc
-````
-
 * Email account (Gmail recommended) for battery alerts
 
 ---
@@ -38,26 +36,26 @@ A Python application to read data from multiple Xiaomi LYWSD03MMC temperature & 
 1. Clone or download the repository.
 2. Update `devices.py` with your sensors' MAC addresses:
 
-   ```python
+   ````python
    kids_bedroom = 'AA:BB:CC:DD:EE:FF'
    parents_bedroom = '11:22:33:44:55:66'
    living_room = '77:88:99:AA:BB:CC'
    airbnb = 'DD:EE:FF:00:11:22'
-   ```
+   ````
 3. Update `my_accounts.py` with email credentials:
 
-   ```python
+   ``````python
    email_sender = "your_email@gmail.com"
    email_recipient = "recipient_email@gmail.com"
    email_password = "your_app_password"
-   ```
+   ``````
 
    > Note: For Gmail, use an **App Password** if 2FA is enabled.
 4. Run the app:
 
-   ```bash
+   ``````bash
    python main.py
-   ```
+   ``````
 
 ---
 
@@ -100,7 +98,7 @@ A Python application to read data from multiple Xiaomi LYWSD03MMC temperature & 
 
 ## Example Console Output
 
-```
+`````
 --------------------
 Rooms Name: Parents
 Temperature: 19.64
@@ -113,7 +111,7 @@ Temperature: 21.32
 Humidity: 60
 Battery: 50
 Battery is charged
-```
+`````
 
 ---
 
