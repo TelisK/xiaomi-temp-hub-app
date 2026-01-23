@@ -43,7 +43,7 @@ def read_data(name:str, device_mac_address):
         print(f'Rooms Name: {name}\nTemperature: {str(room_data.temperature)}\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
         if room_data.battery <= 25: # Connect with the database so can inform user every -1%.
-            previous_batt = mydb.battery_fall_check(name)
+            previous_batt = mydb.battery_lowest_check(name)
             if previous_batt is not None and previous_batt > room_data.battery:  # compare float with int
                 low_battery_email(room_data.battery, name)
                 print('Low Battery Email Sent')
@@ -65,7 +65,7 @@ def read_data(name:str, device_mac_address):
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
     except:
         error_reading = 0 # 0 = False
-        mydb.add_to_db_error(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),error_reading)
+        #mydb.add_to_db_error(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),error_reading)
         print('--------------------')
         print(f'Connection Error at room {name}')
         return 'Error', {name}
@@ -81,6 +81,6 @@ while True:
 
 
 
-    time.sleep(60)
+    time.sleep(300)
 
     
