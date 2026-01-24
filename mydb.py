@@ -49,7 +49,7 @@ def battery_lowest_check(name):
     with sqlite3.connect('xiaomi-temp-db.db') as conn:
         cur = conn.cursor()
 
-        cur.execute('SELECT battery_lowest FROM rooms WHERE room_name = ?', (name))
+        cur.execute('SELECT battery_lowest FROM rooms WHERE room_name = ?', (name,))
         battery_lowest_value = cur.fetchone()
         return battery_lowest_value[0] if battery_lowest_value is not None else None
 

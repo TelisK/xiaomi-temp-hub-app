@@ -39,11 +39,17 @@ def read_data(name:str, device_mac_address):
     try:
         room = Lywsd03mmcClient(device_mac_address)
         room_data = room.data
+        
+        # Database
+        error_reading = 1 # 1 = True
+        mydb.add_to_db(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),room_data.temperature,room_data.humidity,room_data.battery, error_reading)
         print('--------------------')
         print(f'Rooms Name: {name}\nTemperature: {str(room_data.temperature)}\nHumidity: {str(room_data.humidity)}\nBattery: {str(room_data.battery)}')
         
         if room_data.battery <= 25: # Connect with the database so can inform user every -1%.
             previous_batt = mydb.battery_lowest_check(name)
+            print(f'Previous Battery : {previous_batt}')
+            print(f'New Battery : {room_data.battery}')
             if previous_batt is not None and previous_batt > room_data.battery:  # compare float with int
                 low_battery_email(room_data.battery, name)
                 print('Low Battery Email Sent')
@@ -58,15 +64,12 @@ def read_data(name:str, device_mac_address):
         else:
             print('Battery is charged')
 
-# Database
-        error_reading = 1 # 1 = True
-        mydb.add_to_db(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),room_data.temperature,room_data.humidity,room_data.battery, error_reading)
 
         return str(name), str(room_data.temperature), str(room_data.humidity), str(room_data.battery)
-    except:
+    except Exception as e:
         error_reading = 0 # 0 = False
-        #mydb.add_to_db_error(name,now_date_time.strftime('%d-%m-%Y'),now_date_time.strftime('%H:%M:%S'),error_reading)
         print('--------------------')
+        print(f'Actual Error: {e}') 
         print(f'Connection Error at room {name}')
         return 'Error', {name}
 
