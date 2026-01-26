@@ -66,7 +66,7 @@ def read_data():
 
         cur.execute('SELECT rooms.room_name, rooms.battery_lowest, measurements.measurement_date, measurements.time, ' \
         'measurements.temperature, measurements.humidity, measurements.battery ' \
-        'FROM rooms LEFT JOIN measurements ON rooms.id = measurements.room_id ORDER BY measurements.measurement_date DESC')
+        'FROM rooms LEFT JOIN measurements ON rooms.id = measurements.room_id ORDER BY measurements.measurement_date DESC, measurements.time DESC ')
 
         data = cur.fetchall()
         return data
