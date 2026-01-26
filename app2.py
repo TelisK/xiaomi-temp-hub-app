@@ -73,4 +73,17 @@ def read_data(name:str, device_mac_address):
         print(f'Connection Error at room {name}')
         return 'Error', {name}
 
+
+
+while True:
+
+    kids_bedroom = read_data('Kids',devices.kids_bedroom)
+    parents_bedroom = read_data('Parents',devices.parents_bedroom)
+    living_room = read_data('Living Room',devices.living_room)
+    airbnb = read_data('Airbnb',devices.airbnb)
+
+
+
+    time.sleep(300)
+
     

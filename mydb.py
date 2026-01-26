@@ -59,3 +59,14 @@ def update_battery_lowest_update(name, battery):
 
         cur.execute('UPDATE rooms SET battery_lowest = ? WHERE room_name = ?', (battery,name))
         print('Lowest battery cell updated')
+
+def read_data():
+    with sqlite3.connect('xiaomi-temp-db.db') as conn:
+        cur = conn.cursor()
+
+        cur.execute('SELECT rooms.room_name, rooms.battery_lowest, measurements.measurement_date, measurements.time, ' \
+        'measurements.temperature, measurements.humidity, measurements.battery ' \
+        'FROM rooms LEFT JOIN measurements ON rooms.id = measurements.room_id ORDER BY measurements.measurement_date DESC')
+
+        data = cur.fetchall()
+        return data
