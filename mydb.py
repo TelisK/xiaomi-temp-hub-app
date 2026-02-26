@@ -58,7 +58,6 @@ def update_battery_lowest_update(name, battery):
         cur = conn.cursor()
 
         cur.execute('UPDATE rooms SET battery_lowest = ? WHERE room_name = ?', (battery,name))
-        print('Lowest battery cell updated')
 
 def read_data():
     with sqlite3.connect('xiaomi-temp-db.db') as conn:
