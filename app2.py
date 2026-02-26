@@ -1,23 +1,26 @@
 from lywsd03mmc import Lywsd03mmcClient
 from datetime import datetime
 import time
-import devices
 # email
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import my_accounts
 #db
 import mydb
 #logging
 import logging
+from dotenv import load_dotenv
+import os
 
+#logging config
 FORMAT = '%(asctime)s :  %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT, handlers=[logging.FileHandler('logs.log'), logging.StreamHandler()])
 
 logger = logging.getLogger(__name__)
 
+load_dotenv()
 
+# Database
 mydb.db_creation()
 mydb.rooms_to_database()
 
@@ -26,9 +29,9 @@ def low_battery_email(battery, name):
     try:
         subject = 'Xiaomi Low Battery Warning'
         body = f'Your device with name "{name}", is low on battery {battery} %\nReplace the battery soon!'
-        sender = my_accounts.email_sender
-        recipient = my_accounts.email_recipient
-        password = my_accounts.email_password
+        sender = os.getenv('email_sender')
+        recipient = os.getenv('email_recipient')
+        password = os.getenv('email_password')
 
         msg = MIMEText(body)
         msg['Subject'] = subject
@@ -91,11 +94,10 @@ def read_data(name:str, device_mac_address):
 
 while True:
 
-    kids_bedroom = read_data('Kids',devices.kids_bedroom)
-    parents_bedroom = read_data('Parents',devices.parents_bedroom)
-    living_room = read_data('Living Room',devices.living_room)
-    airbnb = read_data('Airbnb',devices.airbnb)
-
+    kids_bedroom = read_data('Kids',os.getenv('kids_bedroom'))
+    parents_bedroom = read_data('Parents',os.getenv('parents_bedroom'))
+    living_room = read_data('Living Room',os.getenv('living_room'))
+    airbnb = read_data('Airbnb',os.getenv('airbnb'))
 
 
     time.sleep(300)
