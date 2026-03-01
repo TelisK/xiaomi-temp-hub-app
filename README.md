@@ -55,7 +55,7 @@ airbnb=A4:C1:38:XX:XX:XX
 3. Run the app:
 
 ```bash
-python main.py
+python app2.py
 ```
 
 ---
@@ -83,7 +83,7 @@ python main.py
 ## Notes
 
 - BLE connections are sequential due to single Bluetooth adapter limitations.
-- To change the monitoring interval, modify `time.sleep(300)` in `main.py`.
+- To change the monitoring interval, modify `time.sleep(300)` in `app2.py`.
 - Logs are written to both the terminal and `logs.log`.
 
 ---
