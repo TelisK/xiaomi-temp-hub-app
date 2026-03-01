@@ -1,4 +1,3 @@
-
 # Xiaomi Temperature Hub
 
 A Python application to read data from multiple Xiaomi LYWSD03MMC temperature & humidity sensors and store the measurements in a local SQLite database. The app also monitors battery levels and sends email notifications when batteries are low.
@@ -12,119 +11,83 @@ A Python application to read data from multiple Xiaomi LYWSD03MMC temperature & 
   - Parents Bedroom
   - Living Room
   - Airbnb
-- Store readings in a **SQLite database** (`xiaomi-temp-db.db`) with:
-  - Rooms table
-  - Measurements table (temperature, humidity, battery, battery_lowest, error tracking)
+- Store readings in a **SQLite database** with a Rooms table and Measurements table
 - Monitor battery levels and send **email alerts** when battery drops below 25%
-- Automatically handles first-time measurements and errors during sensor reads
-- Continuous monitoring loop (default: 60 seconds between cycles)
+- Connection timeout protection (default: 20 seconds per device)
+- Full logging to terminal and `logs.log` file
 
 ---
 
 ## Requirements
 
 - Python 3.7+
-- Libraries:
-  ```bash
-  pip install python-lywsd03mmc
-* Email account (Gmail recommended) for battery alerts
+- Raspberry Pi with Bluetooth enabled
+
+```bash
+pip install python-lywsd03mmc python-dotenv pebble
+```
+
+- Email account (Gmail recommended) for battery alerts
 
 ---
 
 ## Setup
 
 1. Clone or download the repository.
-2. Update `devices.py` with your sensors' MAC addresses:
 
-   ````python
-   kids_bedroom = 'AA:BB:CC:DD:EE:FF'
-   parents_bedroom = '11:22:33:44:55:66'
-   living_room = '77:88:99:AA:BB:CC'
-   airbnb = 'DD:EE:FF:00:11:22'
-   ````
-3. Update `my_accounts.py` with email credentials:
+2. Create a `.env` file in the root folder with your credentials and MAC addresses:
 
-   ``````python
-   email_sender = "your_email@gmail.com"
-   email_recipient = "recipient_email@gmail.com"
-   email_password = "your_app_password"
-   ``````
+```env
+# Email
+email_sender=yourmail@gmail.com
+email_password=your_app_password
+email_recipient=recipient@gmail.com
 
-   > Note: For Gmail, use an **App Password** if 2FA is enabled.
-4. Run the app:
+# Device MAC Addresses
+kids_bedroom=A4:C1:38:XX:XX:XX
+parents_bedroom=A4:C1:38:XX:XX:XX
+living_room=A4:C1:38:XX:XX:XX
+airbnb=A4:C1:38:XX:XX:XX
+```
 
-   ``````bash
-   python main.py
-   ``````
+> ⚠️ For Gmail, use an **App Password** if 2FA is enabled. Never commit `.env` to GitHub.
+
+3. Run the app:
+
+```bash
+python main.py
+```
 
 ---
 
 ## Database Structure
 
-* **Rooms table**
+**Rooms table** — `id`, `room_name`
 
-  * `id`: INTEGER PRIMARY KEY
-  * `room_name`: TEXT UNIQUE NOT NULL
-* **Measurements table**
-
-  * `measurements_id`: INTEGER PRIMARY KEY AUTOINCREMENT
-  * `room_id`: INTEGER (foreign key to `rooms`)
-  * `measurement_date`: TEXT
-  * `time`: TEXT
-  * `temperature`: FLOAT
-  * `humidity`: FLOAT
-  * `battery`: FLOAT
-  * `battery_lowest`: FLOAT
-  * `error_reading`: INTEGER (1 = success, 0 = failure)
+**Measurements table** — `measurements_id`, `room_id`, `measurement_date`, `time`, `temperature`, `humidity`, `battery`, `battery_lowest`
 
 ---
 
 ## How It Works
 
-1. On startup, the app **creates the database** and **writes rooms** if they don't exist.
-2. Every 60 seconds:
-
-   * Reads data from each sensor using `Lywsd03mmcClient`.
-   * Prints current readings to the console.
-   * Checks battery level:
-
-     * If battery ≤ 25% and lower than the previous value → sends email alert.
-     * Updates the database with the lowest battery value.
-   * Stores temperature, humidity, and battery readings in the database.
-   * Logs errors if a sensor cannot be read.
+1. On startup, the app creates the database and writes rooms if they don't exist.
+2. Every 5 minutes:
+   - Reads data from each sensor with a 20-second timeout per device.
+   - Checks battery level — if battery ≤ 25% and lower than previous value, sends email alert.
+   - Stores all readings in the database.
+   - Logs errors if a sensor cannot be read.
 3. Loop repeats indefinitely.
 
 ---
 
-## Example Console Output
+## Notes
 
-`````
---------------------
-Rooms Name: Parents
-Temperature: 19.64
-Humidity: 64
-Battery: 22
-Low Battery Email Sent
---------------------
-Rooms Name: Kids
-Temperature: 21.32
-Humidity: 60
-Battery: 50
-Battery is charged
-`````
-
----
-
-## Notes / Tips
-
-* Ensure Bluetooth is enabled on your device running the app.
-* If a sensor read fails, the error is logged and the loop continues.
-* To change the monitoring interval, modify `time.sleep(60)` in `main.py`.
-* Use a Gmail App Password for secure email sending.
+- BLE connections are sequential due to single Bluetooth adapter limitations.
+- To change the monitoring interval, modify `time.sleep(300)` in `main.py`.
+- Logs are written to both the terminal and `logs.log`.
 
 ---
 
 ## License
 
 This project is open-source and free to use for personal or educational purposes.
-
