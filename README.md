@@ -50,7 +50,7 @@ living_room=A4:C1:38:XX:XX:XX
 airbnb=A4:C1:38:XX:XX:XX
 ```
 
-> ⚠️ For Gmail, use an **App Password** if 2FA is enabled. Never commit `.env` to GitHub.
+>  For Gmail, use an **App Password** if 2FA is enabled.
 
 3. Run the app:
 
